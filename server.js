@@ -13,16 +13,12 @@ var awardBase = 0;
 var gameType = 2;
 var roomId = 0;
 var records = [];
-var multiplierValue = [49, 14, 5.3, 2.1, 0.5, 0.2, 0.0, 0.2, 0.5, 2.1, 5.3, 14, 49];
-/*var probabilities = [0.00129327, 0.00129327, 0.02884998, 0.06565858, 0.14723438,
-    0.15718265, 0.19697573, 0.15718265, 0.14723438, 0.06565858,
-    0.02884998, 0.00129327, 0.00129327]; //95.46%
-*/
-var probabilities = [0.0005, 0.0005, 0.015, 0.0325, 0.075,
-    0.08, 0.593, 0.08, 0.075, 0.0325,
-    0.015, 0.0005, 0.0005]; //88.15%
+var multiplierValue = [500, 100, 10, 2, 0, 0, 2, 50, 200, 1000];
 
+//1864
+var probabilities = [0.064, 0.319, 3.187, 15.934, 31.867, 31.867, 15.934, 0.637, 0.159, 0.032]
 
+var count = 0;
 
 function generateRandomString(length) {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -126,7 +122,7 @@ function joinRoomRequest() {
                 errCode: 0,
                 balance: balance,
                 betInfo: [betInfo],
-                currencyInfo: currencyInfo,
+                currencyInfo: [currencyInfo],
             }]
         }
     }
@@ -260,8 +256,15 @@ function setBetRequest(bet) {
         return acc;
     }, []);
 
-    var randomNumber = Math.random();
+    var randomNumber = Math.random() * 100; // Assuming you want a value between 0 and 100
+
     var selectedMultiplierIndex = cumulativeProbabilities.findIndex(cumProb => randomNumber < cumProb);
+
+    if (selectedMultiplierIndex === -1) {
+        // Handle the case where no index is found
+        // For example, you can set it to the last index
+        selectedMultiplierIndex = cumulativeProbabilities.length - 1;
+    }
 
     let winAmount = multiplierValue[selectedMultiplierIndex - 1] * bet;
 
@@ -271,14 +274,14 @@ function setBetRequest(bet) {
         vals: {},
     }
 
-    betInfo = {
+    betInfo = [{
         bet: awardBase,
         balance: balance,
         index: selectedMultiplierIndex,
         winAmount: winAmount,
         roundId: gameCode,
         finalBalance: balance + winAmount,
-    }
+    }]
     response.vals = {
         type: 100000,
         id: 3,
